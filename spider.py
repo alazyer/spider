@@ -2,6 +2,9 @@
 # coding: utf8
 
 import optparse
+import sqlite3
+import requests
+from bs4 import BeautifulSoup
 
 def parse_options():
     parser = optparse.OptionParser()
@@ -34,10 +37,23 @@ def parse_options():
 
     return options, args
 
+def get_page(url):
+    res = requests.get(url)
+    soup = BeautifulSoup(res.text)
+    urls_in_page = [x['href'].strip() for x in soup.select('a[href]')]
+    urls_in_page = [x for x in urls_in_page if x.startswith('http')]
+
+    for urls in urls_in_page:
+        print urls
+
+    return urls_in_page
+
 if __name__=='__main__':
 
     options, args = parse_options()
     root_url = options.url
     deepth = options.deepth
     print "the url you specified is: ", root_url
-    print "the deepth to be crawled is:", deepth
+    print "the deepth to be crawled is: ", deepth
+
+    get_page(root_url)
