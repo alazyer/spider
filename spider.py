@@ -3,11 +3,9 @@
 
 import re
 import os
-import sys
 import time
 import Queue
 import logging
-import weakref
 import datetime
 import urlparse
 import optparse
@@ -47,7 +45,7 @@ def parse_options():
 
     parser.add_option("-e", "--downloadfile", dest="download_file", type="string",
                help="file extentions to be downloaded.")
-    
+
     parser.add_option("--testself", action="store_true", dest="testself",
                help="the program test itself")
 
@@ -58,7 +56,7 @@ def parse_options():
 def config_logger(log_file, log_level):
     if os.path.isfile(log_file):
         os.remove(log_file)
-        
+
     logger.setLevel(log_level)
     file_handler = logging.FileHandler(log_file)
     formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
@@ -166,7 +164,7 @@ class Crawler:
     """爬虫类, 用于爬取内容.
     """
     def __init__(self, url, depth, num_workers):
-        """初始化爬虫类, 指定初始urls, 以及需要爬取的深度, 
+        """初始化爬虫类, 指定初始urls, 以及需要爬取的深度,
         线程池中线程的数量.
         """
         self.url = url
@@ -183,7 +181,7 @@ class Crawler:
         cur_depth = 0
         self.urls_queue.put(self.url)
         self.thread_pool.start()
-        
+
         # 没有到达指定的深度的最后一层, 爬取页面内容, 以及页面中包含的链接.
         while cur_depth < self.depth:
             while not self.urls_queue.empty():
@@ -196,7 +194,7 @@ class Crawler:
             self.thread_pool.request_queue.join()
             self.mover.move()
             cur_depth += 1
-        
+
         # 最后一层只爬取内容, 不记录页面上存在的链接.
         while not self.urls_queue.empty():
             url = self.urls_queue.get()
@@ -218,7 +216,7 @@ class Recorder(threading.Thread):
     """打印信息线程, 每10秒打印一次完成链接数, 以及线程池中剩余请求数量.
     结束前, 统计运行时间, 以及完成链接总数量.
     """
-    
+
     def __init__(self, crawler):
         """线程初始化, 指定要统计信息的crawler实例.
         """
@@ -252,11 +250,9 @@ class Recorder(threading.Thread):
 
 
 if __name__=='__main__':
-    
-
     options = parse_options()
-    root_url = options.url or 'http://www.sohu.com'
-    depth = options.depth or 1
+    root_url = options.url or 'http://www.w3school.com.cn'
+    depth = options.depth or 2
     num_workers = options.thread_num or 20
     log_file = options.log_file or 'spider.log'
     log_level = options.log_level or 5
@@ -266,12 +262,11 @@ if __name__=='__main__':
     print "the number of workers is: ", num_workers
     print "The log file is: ", log_file
     print "The log level is: ", log_level
-    
+
     if testself:
-    
         tester = BasicTest(root_url, depth, num_workers, log_file, log_level)
         tester.main()
-    
+
     config_logger(log_file, log_level)
 
     crawler = Crawler(root_url, depth, num_workers)
